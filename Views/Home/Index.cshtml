@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Register>
+@{
+    ViewData["Title"] = "Home Page";
+}
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-dismissible alert-danger">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <strong>Mensaje: </strong> @TempData["success"]
+    </div>
+}
+<div class="text-center">
+    <form method="post">
+    <p>
+        Original URL
+            <input type="text" name="Url" id="Url" placeholder="url" />
+            <button asp-controller="Home" asp-action="Add" type="submit">Generate Short URL</button>
+    </p>
+    </form>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>Short</th>
+            <th>Url</th>
+            <th>Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model)
+        {
+            <tr>
+                <td><a asp-controller="Home" asp-action="Redirect" asp-route-id="@item.id">@item.id</a></td>
+                <td>@item.url</td>
+                <td>@item.count</td>
+            </tr>
+        }
+    </tbody>
+</table>
