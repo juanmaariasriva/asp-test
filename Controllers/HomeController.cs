@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using Wangkanai.Detection.Models;
 using Wangkanai.Detection.Services;
+using Wangkanai.Extensions;
 
 namespace senddatatest.Controllers
 {
@@ -22,11 +23,27 @@ namespace senddatatest.Controllers
             _detectionService = detectionService;
         }
 
-        public IActionResult Index()
+
+        [Route("")]
+        [Route("{Id?}")]
+        public IActionResult Index(String? Id)
         {
+            if (!Id.IsNullOrEmpty())
+            {
+                Register aux = _db.Registers.Find(Id);
+                if(aux != null)
+                {
+                    return new RedirectResult(aux.url);
+                }
+                else
+                {
+                    return new StatusCodeResult(404);
+                }
+            }
             IEnumerable<Register> registrations = _db.Registers;
             return View(registrations);
         }
+
         [HttpPost]
         public IActionResult Add(String Url)
         {
@@ -34,7 +51,7 @@ namespace senddatatest.Controllers
             Boolean isValid = Uri.TryCreate(Url, UriKind.Absolute, out uriResult);
             if (!isValid)
             {
-                TempData["success"] = "The URL is invalid";
+                TempData["alert"] = "The URL is invalid";
             }
             else
             {
@@ -55,15 +72,24 @@ namespace senddatatest.Controllers
                 }
                 if (code.Length > 0)
                 {
-                    reg.id = code;
-                    reg.url = Url;
-                    reg.count = 0;
-                    _db.Registers.Add(reg);
-                    _db.SaveChanges();
+                    Register aux = _db.Registers.Where(x => x.url == Url).FirstOrDefault();
+                    if (aux == null)
+                    {
+                        reg.id = code;
+                        reg.url = Url;
+                        reg.count = 0;
+                        _db.Registers.Add(reg);
+                        _db.SaveChanges();
+                        TempData["success"] = "Was successfully created!!!";
+                    }
+                    else
+                    {
+                        TempData["alert"] = "The URL Exist!!! this one is " + aux.id;
+                    }
                 }
                 else
                 {
-                    TempData["success"] = "Error with the short url";
+                    TempData["alert"] = "Error with the short url";
                 }
             }
             return RedirectToAction("Index");
@@ -86,7 +112,7 @@ namespace senddatatest.Controllers
                 aux.count++;
                 _db.Registers.Update(aux);
                 _db.SaveChanges();
-                return RedirectToAction("Index");
+                return new RedirectResult(aux.url); ;
             }
             else
             {

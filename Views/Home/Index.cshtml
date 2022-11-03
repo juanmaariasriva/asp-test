@@ -2,9 +2,16 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-@if (TempData["success"] != null)
+@if (TempData["alert"] != null)
 {
     <div class="alert alert-dismissible alert-danger">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <strong>Mensaje: </strong> @TempData["alert"]
+    </div>
+}
+else if (TempData["success"] != null)
+{
+    <div class="alert alert-dismissible alert-success">
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         <strong>Mensaje: </strong> @TempData["success"]
     </div>
